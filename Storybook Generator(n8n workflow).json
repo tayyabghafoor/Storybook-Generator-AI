@@ -1,0 +1,1803 @@
+{
+  "name": "with Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "adde0565-68bd-42fb-8c51-be5bee50d198",
+      "name": "Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1808,
+        1152
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1152
+      ],
+      "id": "c0b4076d-2a50-4164-a47f-7b90696253e1",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "462cf5b3-65cd-41fb-8643-9730771112ed",
+              "name": "topic",
+              "value": "={{ $json.parsedOutput['What\\'s the topic?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "29c4167f-51a7-4910-9f9c-dc11dcd3e334",
+              "name": "author",
+              "value": "={{ $json.parsedOutput['Do you know who you want it to sound like?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "77330344-b611-4009-aec4-53a41d3519d6",
+              "name": "author_name",
+              "value": "={{ $json.parsedOutput['What is the author name?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "1d39613e-ffe4-4ef5-afa7-4d8f537b9cbd",
+              "name": "protagonist_description",
+              "value": "={{ $json.parsedOutput['Describe the protagonist'] }}",
+              "type": "string"
+            },
+            {
+              "id": "db542f74-e1a7-4f34-9527-48fa697ee195",
+              "name": "folder_name",
+              "value": "={{ $json.parsedOutput['What\\'s the topic?'] }}-{{$now.toUTC().format('yyyy-MM-dd-HH-mm')}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2576,
+        960
+      ],
+      "id": "b3d2b0b0-7996-4a21-a2ac-47111214defc",
+      "name": "Set Book Topic"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Who is a modern expert in  {{ $json.topic }} and popular among young people? We will use their style for a children book. Pick the one with the most recognition: bestseller books published, social media coverage and audience.\n\nOutput one name that is the most relevant and only the name. No explanation."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        3008,
+        960
+      ],
+      "id": "7aefc5fc-47f7-4b56-a31d-9fbc3bfbfd04",
+      "name": "Find Author/Expert"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9a6e08e-9685-4416-bcf4-9ac7a2861fba",
+              "name": "author",
+              "value": "={{ $json.text ?? $json.author }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3392,
+        960
+      ],
+      "id": "48ac846c-d0fa-4e0b-a34b-cc4ca1a8b4cb",
+      "name": "Set Author/Expert"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}\n\nOutput as JSON:\n{\n\"book\": [{\n\"page\": 1,\n\"text\": \"text page - 2 lines\"\n}]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        4112,
+        640
+      ],
+      "id": "4eabe28a-4773-4e7d-ac9b-18e037a7b5d0",
+      "name": "Create Poem"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd38c1b0-846f-40a3-9520-6daa21ed7f15",
+              "name": "prompt",
+              "value": "=Help me create a rhyming picture book called \"A Child’s First Book on {{ $('Set Book Topic').item.json.topic }}\", introducing the concept of {{ $('Set Book Topic').item.json.topic }} in a simple, magical way children can understand.\n\nThe book should be written in rhyming couplets — 2 lines per page. \n\nThink Dr. Seuss meets {{ $json.author }}, with the cozy feel of a vintage Golden Book.\nWords should be simple modern day words.\n\nThe book should end with a closing page that simply says:\n\"THE END\"",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3600,
+        960
+      ],
+      "id": "c1e3eb19-124d-44e6-bbb4-48a7079bac85",
+      "name": "Set Base Prompt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8406059d-1975-4730-abb5-22d42dc16c27",
+              "leftValue": "={{ $('Set Book Topic').item.json.protagonist_description }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3824,
+        960
+      ],
+      "id": "c3540d3f-ef6b-4cf6-b0b9-0644d2619422",
+      "name": "If: no protagonist description"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Set Base Prompt').item.json.prompt }}\n\nI need a description of a protagonist for this book.\n\nOutput a concise description for a suitable protagonist, including folloing details:\n- gender\n- hair style and color\n- eye color\n- clothing pieces and their colors\n\nOutput description and only it. Don't invent name, we'll use it as is for illustrations."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        4128,
+        960
+      ],
+      "id": "1c44f725-72bc-47f1-ba29-2606ee27cfc7",
+      "name": "Create Protagonist"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9a6e08e-9685-4416-bcf4-9ac7a2861fba",
+              "name": "protagonist",
+              "value": "={{ $json.text ?? $('Set Book Topic').item.json.protagonist_description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4496,
+        960
+      ],
+      "id": "29160e15-ae46-4c04-90dd-9656786508ed",
+      "name": "Set Protagonist"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Set Book Topic').first().json.folder_name }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ABuxEn3Tfz_W8vfAC7YRH1D-uoNpEGjc",
+          "mode": "list",
+          "cachedResultName": "books",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ABuxEn3Tfz_W8vfAC7YRH1D-uoNpEGjc"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3936,
+        1328
+      ],
+      "id": "6aa09143-73ba-42d7-a9d9-42d5697bdef7",
+      "name": "Create Google Drive Folder for Book",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "=0-cover",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create Google Drive Folder for Book').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6048,
+        448
+      ],
+      "id": "cfc2aa60-aa0a-48c9-a009-d358b6c3139b",
+      "name": "Upload Cover Page",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "image",
+        "options": {
+          "mimeType": "image/png"
+        }
+      },
+      "id": "f6de5f3f-38cc-4f0d-8dc3-48df849b184c",
+      "name": "Convert Binary Img to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        7264,
+        960
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://slides.googleapis.com/v1/presentations/{{ $('CopyBookTemplate').item.json.id }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSlidesOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"createSlide\": {\n        \"slideLayoutReference\": {\n          \"predefinedLayout\": \"BLANK\"\n          \n        } \n      } \n    } \n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8736,
+        1136
+      ],
+      "id": "83694231-cd4f-4a18-a60f-799aca28e9bf",
+      "name": "Create Slides",
+      "credentials": {
+        "googleSlidesOAuth2Api": {
+          "id": "FahdXCl85woBnaKN",
+          "name": "Google Slides account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://slides.googleapis.com/v1/presentations/{{ $('CopyBookTemplate').item.json.id }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSlidesOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"createImage\": {\n        \"url\": \"{{ $('Loop Over Items').item.json.images.webContentLink }}\",\n        \"elementProperties\": {\n           \"size\": {\n            \"width\": {\n              \"unit\": \"{{ $('Get Created Presentation').item.json.pageSize.width.unit }}\",\n              \"magnitude\": {{ $('Get Created Presentation').item.json.pageSize.width.magnitude }}\n            },\n            \"height\": {\n              \"unit\": \"{{ $('Get Created Presentation').item.json.pageSize.height.unit }}\",\n              \"magnitude\": {{ $('Get Created Presentation').item.json.pageSize.height.magnitude }}\n            }\n          },\n  \"transform\": {\n    \"scaleX\":  1,\n    \"scaleY\":  1,\n    \"translateX\": 0,\n    \"translateY\": 0,\n    \"unit\": \"PT\"\n  },\n          \"pageObjectId\": \"{{ $('Create Slides').item.json.replies[0].createSlide.objectId }}\" \n        } \n      } \n    } \n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        9168,
+        1136
+      ],
+      "id": "0ca26a1d-1163-4a34-a36d-2924a3992277",
+      "name": "Add Image To Slide",
+      "credentials": {
+        "googleSlidesOAuth2Api": {
+          "id": "FahdXCl85woBnaKN",
+          "name": "Google Slides account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        8496,
+        1120
+      ],
+      "id": "f8a42e38-e8e8-423d-87c1-3411284b870f",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.images.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8944,
+        1136
+      ],
+      "id": "f9b30abe-c126-41c1-8d3f-ef889b7fa635",
+      "name": "Update Image Permissions",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('CopyBookTemplate').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf",
+              "slidesToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        8928,
+        848
+      ],
+      "id": "d0b20e94-8938-4de4-82c4-55e2b1a781ce",
+      "name": "Convert slides to PDF",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1_Mfgb7lUD8tXRg3cXeIQXjQ9vgCG-TzwOoWVok_ROQ8",
+          "mode": "list",
+          "cachedResultName": "Book_Template",
+          "cachedResultUrl": "https://docs.google.com/presentation/d/1_Mfgb7lUD8tXRg3cXeIQXjQ9vgCG-TzwOoWVok_ROQ8/edit?usp=drivesdk"
+        },
+        "name": "=Book On {{$('Set Book Topic').item.json.topic}}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4208,
+        1328
+      ],
+      "id": "30eb64fd-67f2-4557-91a0-d170f1404cd2",
+      "name": "CopyBookTemplate",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        8704,
+        848
+      ],
+      "id": "32879bd1-f349-4d78-9f4e-92fd33e6c4f5",
+      "name": "Limit: 1Page"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Get Created Presentation').item.json.title }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create Google Drive Folder for Book').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9152,
+        848
+      ],
+      "id": "5122287f-b54b-4b89-a5c1-259f1b165e04",
+      "name": "Upload Final PDF File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "909e9f0e-2a75-4e4f-ac92-9a08a172ffa7",
+              "leftValue": "={{ $json.author }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2784,
+        960
+      ],
+      "id": "317c20d7-9ff7-45c2-a527-15477210fafd",
+      "name": "If: Author/Expert Not Set"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "specifiedFields",
+        "fieldsToInclude": "book,protagonist,presentationId,pageSize,slides",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        5024,
+        1104
+      ],
+      "id": "36b65a59-3a61-42f1-a9a5-a2db64355104",
+      "name": "Aggregate Inputs"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c2e1b18f-a08f-4a01-8fc1-5dd885027e09",
+              "name": "pages",
+              "value": "={{ $json.data[0].book }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5968,
+        1104
+      ],
+      "id": "70850ba5-38f3-417c-ab89-8d5cdde52373",
+      "name": "Set Pages"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "pages"
+            },
+            {
+              "fieldToAggregate": "data",
+              "renameField": true,
+              "outputFieldName": "cover_image"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        6352,
+        1168
+      ],
+      "id": "41c40f88-1a41-45cd-9f58-f424fef115da",
+      "name": "Aggregate Pages"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://slides.googleapis.com/v1/presentations/{{ $('Get Created Presentation').item.json.presentationId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSlidesOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"createImage\": {\n        \"url\": \"{{ $('Upload Cover Page').item.json.webContentLink }}\",\n        \"elementProperties\": {\n           \"size\": {\n            \"width\": {\n              \"unit\": \"{{ $('Get Created Presentation').item.json.pageSize.width.unit }}\",\n              \"magnitude\": {{ $('Get Created Presentation').item.json.pageSize.width.magnitude }}\n            },\n            \"height\": {\n              \"unit\": \"{{ $('Get Created Presentation').item.json.pageSize.height.unit }}\",\n              \"magnitude\": {{ $('Get Created Presentation').item.json.pageSize.height.magnitude }}\n            }\n          },\n  \"transform\": {\n    \"scaleX\":  1,\n    \"scaleY\":  1,\n    \"translateX\": 0,\n    \"translateY\": 0,\n    \"unit\": \"PT\"\n  },\n          \"pageObjectId\": \"{{ $('Get Created Presentation').item.json.slides[0].objectId }}\" \n        } \n      } \n    } \n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6496,
+        448
+      ],
+      "id": "2a03d944-6e05-46b3-9ab3-7b63147ff319",
+      "name": "Add Cover Image To Slide",
+      "credentials": {
+        "googleSlidesOAuth2Api": {
+          "id": "FahdXCl85woBnaKN",
+          "name": "Google Slides account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "pages",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        6544,
+        1168
+      ],
+      "id": "5d855017-bb19-4cc7-a21e-5a84936edc99",
+      "name": "Split Pages"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "images.pages.page"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        8256,
+        1056
+      ],
+      "id": "a9247707-b82e-46e3-8362-0651b456ebec",
+      "name": "Sort by Page Number"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "presentationId": "={{ $('CopyBookTemplate').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.googleSlides",
+      "typeVersion": 2,
+      "position": [
+        4496,
+        1328
+      ],
+      "id": "93ca3144-97fc-410e-87ac-d67a7e434730",
+      "name": "Get Created Presentation",
+      "credentials": {
+        "googleSlidesOAuth2Api": {
+          "id": "FahdXCl85woBnaKN",
+          "name": "Google Slides account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6272,
+        448
+      ],
+      "id": "42ec48a0-fe01-48f2-97d6-cc5ec3286d78",
+      "name": "Update Cover Image Permissions",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        6000,
+        928
+      ],
+      "id": "81730255-0985-4015-bf19-265da855fcab",
+      "name": "Extract Data from Image File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        6192,
+        1008
+      ],
+      "id": "7ba60c0c-4ce4-4613-a526-732c0f33a9d4",
+      "name": "Merge: Pages + Cover"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        4800,
+        1040
+      ],
+      "id": "4c753df5-574b-47bb-a22a-2e00194193bb",
+      "name": "Merge: Poem + Character Description"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=data",
+        "name": "=page-{{ $('Split Pages').item.json.pages.page }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create Google Drive Folder for Book').first().json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7504,
+        960
+      ],
+      "id": "50c5b65f-7220-4f14-adb4-187af3ac5f05",
+      "name": "Upload New Image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        7712,
+        1152
+      ],
+      "id": "33e17a1a-ca39-4855-9dc0-8be936ad4942",
+      "name": "Merge By Order: Page + Generated Image"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        8096,
+        1056
+      ],
+      "id": "c0fb1d1e-69ea-40ea-8848-7bfd3005247a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "images",
+        "include": "specifiedFields",
+        "fieldsToInclude": "id,name,webContentLink,pages",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        7904,
+        1056
+      ],
+      "id": "c437a8b1-2fc7-4906-8021-fa43b7f4b9ed",
+      "name": "Aggregate With Page Numbers"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        4112,
+        816
+      ],
+      "id": "2a0384b4-7399-455c-ba56-fcb120957a04",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        4128,
+        1136
+      ],
+      "id": "4503b178-f83f-4cc5-8fef-02154fabac8d",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        3008,
+        1136
+      ],
+      "id": "72430ca5-db05-453d-9b17-8477aab3618c",
+      "name": "Groq Chat Model7",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        5760,
+        688
+      ],
+      "id": "5176f0fe-932c-4382-8ee5-5b84b401ab92",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tayyabukasha--z-image-turbo-fastapi-flask-app.modal.run/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n    \"prompt\": $json.text,\n    \"width\": 794,\n    \"height\": 1123,\n    \"steps\": 3\n}, null, 2) }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5568,
+        688
+      ],
+      "id": "61abea59-0133-4752-9f42-8043e90deead",
+      "name": "Generate image1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the image generation prompt the book cover :{{ $('Create book cover prompt').item.json.text }}.\nLike this book cover prompt, generate an image generation prompt for a book page according to this text:{{ $json.pages.text }}.\nRules:\n1. Do not say in the prompt \"create a book page,\" just describe what this book page scenery should look like.\n2. Do not add context like, here is the book page etc.\n3. Just produce an English paragraph. \n4. In the prompt, do not say add this text, rather, use language like \"with this written on it\".\n5. Last and most important rule: write the prompt so {{ $json.pages.text }} is written in it (for instructions, refer to rule number 4).\n6. Font should be Comic Sans, size 24."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        6720,
+        960
+      ],
+      "id": "ab7a9b1c-db75-4f3e-8aa4-a1de7d841428",
+      "name": "Create book pages prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tayyabukasha--z-image-turbo-fastapi-flask-app.modal.run/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n    \"prompt\": $json.text,\n    \"width\": 794,\n    \"height\": 1123,\n    \"steps\": 3\n}, null, 2) }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        7072,
+        960
+      ],
+      "id": "132ade00-1f73-49b5-9dc7-00cc0eaad269",
+      "name": "Generate image2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        6720,
+        1104
+      ],
+      "id": "bd19cd44-a3bb-409d-8515-7f35e1982628",
+      "name": "Groq Chat Model8",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        5248,
+        864
+      ],
+      "id": "919b2bd8-94c4-4d1a-88f7-9ac54f500b98",
+      "name": "Groq Chat Model9",
+      "credentials": {
+        "groqApi": {
+          "id": "Aj0FsK29skE6LQhx",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.webViewLink }}",
+          "mode": "url"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9360,
+        848
+      ],
+      "id": "9642736b-0911-43f3-9d75-d06470f1a8cc",
+      "name": "Update PDF Permissions",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "sRPPe0pM6YbnquXv",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=GOAL\n\nYour mission is to engage the user and collect all required fields for the kids story form. You must:\n\nCollect all required inputs before outputting any JSON:\n\n\"What's the topic?\"\n\n\"Do you know who you want it to sound like?\"\n\n\"What is the author name?\"\n\n\"Describe the protagonist\"\n\nOnly after all fields are collected, output exactly one JSON object in the required format:\n\n{\n  \"What's the topic?\": \"User input\",\n  \"Do you know who you want it to sound like?\": \"User input\",\n  \"What is the author name?\": \"User input\",\n  \"Describe the protagonist\": \"User input\",\n  \"submittedAt\": \"Current ISO timestamp\",\n  \"formMode\": \"test\"\n}\n\n\nDo not output JSON until all fields are filled.\n\nDo not include any extra fields or text outside the JSON.\n\nRULES AND LOGIC\n\nA. Sequential questioning\n\nAsk one question at a time.\n\nOnly move to the next question after receiving a valid answer.\n\nRepeat politely if the user gives an empty or invalid answer.\n\nB. JSON formatting\n\nOnly produce the JSON once all required fields are collected.\n\nUse the exact user input for all fields.\n\nsubmittedAt must be the current ISO timestamp.\n\nformMode must be \"test\".\n\nC. Response style\n\nFriendly, concise, and engaging.\n\nMaximum 2–3 sentences per prompt.\n\nKeep the user focused on providing the requested information.\n\nRESTRICTIONS\n\nNever generate story content.\n\nNever output partial JSON.\n\nDo not output anything outside the JSON until all fields are complete."
+        }
+      },
+      "id": "74609d44-5070-4b48-942c-77f222b375be",
+      "name": "Conversational Parser Chatbot",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1712,
+        944
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7da91477-1973-46d0-88ec-573cb4cbec2d",
+      "name": "Chat bot start",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        1504,
+        944
+      ],
+      "webhookId": "7ffb63b1-754e-4202-8b41-429ead296a61",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "jsCode": "// We'll check if output is in the strict format\nlet strictFormat = false;\n\ntry {\n  // Must have exactly one item\n  if (items.length === 1 && items[0].json.output && typeof items[0].json.output === 'string') {\n    const parsed = JSON.parse(items[0].json.output);\n\n    const requiredKeys = [\n      \"What's the topic?\",\n      \"Do you know who you want it to sound like?\",\n      \"What is the author name?\",\n      \"Describe the protagonist\",\n      \"submittedAt\",\n      \"formMode\"\n    ];\n\n    // Check all required keys exist AND no extra keys\n    if (\n      typeof parsed === 'object' &&\n      !Array.isArray(parsed) &&\n      requiredKeys.every(k => k in parsed) &&\n      Object.keys(parsed).length === requiredKeys.length\n    ) {\n      strictFormat = true;\n      // Attach parsed JSON to item for downstream nodes\n      items[0].json.parsedOutput = parsed;\n    }\n  }\n} catch (e) {\n  // Parsing failed → not strict format\n}\n\n// Always return items so conversation continues\n// Add a flag indicating whether it's strict or not\nitems[0].json.isStrictFormat = strictFormat;\n\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        944
+      ],
+      "id": "980587a5-910f-498c-a851-08edc5cd3b17",
+      "name": "Format Checker and Secondary Format Parses"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "acd42baa-9223-4b35-b34f-7b6abdc847d3",
+              "leftValue": "={{ $json.isStrictFormat }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2288,
+        944
+      ],
+      "id": "a1bf0fd2-235b-4483-b66f-41f5174f619c",
+      "name": "Format check (Inverse)"
+    },
+    {
+      "parameters": {
+        "message": "=Here is the link to your book on {{ $json.topic }}:\n{{ $json.webViewLink }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        9568,
+        848
+      ],
+      "id": "8dd6317a-fb87-4672-ba2a-8a383a19407d",
+      "name": "Give PDF link to chat"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the string that contains JSON\nlet rawText = $json.text;\n\n// Remove ```json and ``` wrappers\nrawText = rawText.replace(/```json|```/g, '').trim();\n\n// Parse string to real JSON\nlet parsed = JSON.parse(rawText);\n\n// Return ONE item with book array\nreturn [\n  {\n    json: {\n      book: parsed.book.map(p => ({\n        page: p.page,\n        text: p.text\n      }))\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4464,
+        768
+      ],
+      "id": "de2e9ec2-8cbb-4fc8-aa99-d8a74bbb49f0",
+      "name": "Poem Parser for paging"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate an image generation prompt for the following book:{{ $('Set Base Prompt').item.json.prompt }}.\n\nRules:\n1. Do not say in the prompt \"create a book cover\" just describe what a book cover for the book should look like.\n2. Do not add context like, here is a book cover for the book etc..\n3. Just produce an English paragraph. "
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        5248,
+        688
+      ],
+      "id": "ee8887be-7ba1-428a-b607-5b17f2497f7b",
+      "name": "Create book cover prompt"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Conversational Parser Chatbot",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Conversational Parser Chatbot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Book Topic": {
+      "main": [
+        [
+          {
+            "node": "If: Author/Expert Not Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Author/Expert": {
+      "main": [
+        [
+          {
+            "node": "Set Author/Expert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Author/Expert": {
+      "main": [
+        [
+          {
+            "node": "Set Base Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Poem": {
+      "main": [
+        [
+          {
+            "node": "Poem Parser for paging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Base Prompt": {
+      "main": [
+        [
+          {
+            "node": "Create Poem",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If: no protagonist description",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Google Drive Folder for Book",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: no protagonist description": {
+      "main": [
+        [
+          {
+            "node": "Create Protagonist",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Protagonist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Protagonist": {
+      "main": [
+        [
+          {
+            "node": "Set Protagonist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Protagonist": {
+      "main": [
+        [
+          {
+            "node": "Merge: Poem + Character Description",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create Google Drive Folder for Book": {
+      "main": [
+        [
+          {
+            "node": "CopyBookTemplate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Cover Page": {
+      "main": [
+        [
+          {
+            "node": "Update Cover Image Permissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Binary Img to File": {
+      "main": [
+        [
+          {
+            "node": "Upload New Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Slides": {
+      "main": [
+        [
+          {
+            "node": "Update Image Permissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Limit: 1Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Slides",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Image To Slide": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Image Permissions": {
+      "main": [
+        [
+          {
+            "node": "Add Image To Slide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert slides to PDF": {
+      "main": [
+        [
+          {
+            "node": "Upload Final PDF File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CopyBookTemplate": {
+      "main": [
+        [
+          {
+            "node": "Get Created Presentation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit: 1Page": {
+      "main": [
+        [
+          {
+            "node": "Convert slides to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Author/Expert Not Set": {
+      "main": [
+        [
+          {
+            "node": "Find Author/Expert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Author/Expert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Inputs": {
+      "main": [
+        [
+          {
+            "node": "Set Pages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create book cover prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Pages": {
+      "main": [
+        [
+          {
+            "node": "Merge: Pages + Cover",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Aggregate Pages": {
+      "main": [
+        [
+          {
+            "node": "Split Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Pages": {
+      "main": [
+        [
+          {
+            "node": "Merge By Order: Page + Generated Image",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Create book pages prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by Page Number": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Created Presentation": {
+      "main": [
+        [
+          {
+            "node": "Merge: Poem + Character Description",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Update Cover Image Permissions": {
+      "main": [
+        [
+          {
+            "node": "Add Cover Image To Slide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data from Image File": {
+      "main": [
+        [
+          {
+            "node": "Merge: Pages + Cover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: Pages + Cover": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: Poem + Character Description": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload New Image": {
+      "main": [
+        [
+          {
+            "node": "Merge By Order: Page + Generated Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge By Order: Page + Generated Image": {
+      "main": [
+        [
+          {
+            "node": "Aggregate With Page Numbers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Sort by Page Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate With Page Numbers": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Final PDF File": {
+      "main": [
+        [
+          {
+            "node": "Update PDF Permissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Poem",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Protagonist",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find Author/Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate image1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Upload Cover Page",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Data from Image File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate image2": {
+      "main": [
+        [
+          {
+            "node": "Convert Binary Img to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create book pages prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model8": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create book pages prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model9": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create book cover prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update PDF Permissions": {
+      "main": [
+        [
+          {
+            "node": "Give PDF link to chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversational Parser Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Format Checker and Secondary Format Parses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat bot start": {
+      "main": [
+        [
+          {
+            "node": "Conversational Parser Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Checker and Secondary Format Parses": {
+      "main": [
+        [
+          {
+            "node": "Format check (Inverse)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format check (Inverse)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set Book Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poem Parser for paging": {
+      "main": [
+        [
+          {
+            "node": "Merge: Poem + Character Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create book cover prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee5f00c1-14ad-4044-8ff2-987f43330cda",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5954b64fe5a7bbf570e5b5ecb43f21f71318440c5491143549a1f84f89fa4f5a"
+  },
+  "id": "4r2aECq2tF5kaU52",
+  "tags": []
+}
