@@ -256,7 +256,7 @@ Learn more about her work:
 ## 📫 Contact / Connect
 
 For more information about the project or to connect professionally:  
-- LinkedIn: [Muhammad Tayyab](https://www.linkedin.com/in/tayyab-ghafoor-6044a6269/)
+- LinkedIn: [Tayyab Ghafoor](https://www.linkedin.com/in/tayyab-ghafoor-6044a6269/)
 
 ---
 
