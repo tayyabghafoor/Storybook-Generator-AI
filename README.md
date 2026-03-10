@@ -241,6 +241,16 @@ This project highlights the potential of **AI-powered creative automation** in e
 
 ---
 
+## 🙏 Acknowledgments / Inspiration
+This AI Storybook Generator was inspired by **Nadia Privalikhina**.  
+The idea and workflow comes from her original concept.  
+
+Learn more about her work here:  
+- 🔗 LinkedIn: [Nadezhda Privalikhina](https://www.linkedin.com/in/nadezhda-privalikhina/)  
+- 🎥 Project Demo: [YouTube Video](https://www.youtube.com/watch?v=RgR-VcNh9Uk)
+
+---
+
 # 📄 License
 
 This project is created for **academic purposes**.
